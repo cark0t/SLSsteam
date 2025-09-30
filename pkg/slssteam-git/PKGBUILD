@@ -1,6 +1,6 @@
 # Maintainer: Ace! _SL/S <acesls@protonmail.com>
 pkgname="slssteam-git"
-pkgver=20250920175812
+pkgver=20250920175812.r8.gc1d823c
 pkgrel=1
 pkgdesc="Steamclient Mod - Pre release"
 arch=("i686" "x86_64")
@@ -25,6 +25,11 @@ makedepends=("git"
 sha256sums=('SKIP')
 validpgpkeys=("63AB8F4BF8A62EEEB8D8C7584410F8CF7129B2D6")
 
+pkgver() {
+	cd "$srcdir/SLSsteam"
+	git describe --long --tags --abbrev=7 | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
 build() {
 	cd "$srcdir/SLSsteam"
 	make
@@ -33,6 +38,7 @@ build() {
 package() {
 	cd "$pkgdir"
 
+	#TODO: Create make install target
 	install -D "$srcdir/SLSsteam/bin/SLSsteam.so" "$pkgdir/usr/lib32/libSLSsteam.so"
 	install -D "$srcdir/SLSsteam/res/SLSsteam.desktop" "$pkgdir/usr/share/applications/SLSsteam.desktop"
 	install -D "$srcdir/SLSsteam/res/SLSsteam-native.desktop" "$pkgdir/usr/share/applications/SLSsteam-native.desktop"

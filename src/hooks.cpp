@@ -148,9 +148,19 @@ static void hkLogSteamPipeCall(const char* iface, const char* fn)
 	}
 }
 
+static uint32_t hkCAPIJob_RequestUserStats(void* a0)
 {
+	const uint32_t ret = Hooks::CAPIJob_RequestUserStats.tramp.fn(a0);
+	g_pLog->once
+	(
+		"%s(%p) -> %u\n",
 
+		Hooks::CAPIJob_RequestUserStats.name.c_str(),
+		a0,
+		ret
+	);
 
+	return 3;
 }
 
 static bool applistRequested = false;
@@ -586,6 +596,8 @@ namespace Hooks
 	DetourHook<IClientApps_PipeLoop_t> IClientApps_PipeLoop("IClientApps::PipeLoop");
 	DetourHook<IClientRemoteStorage_PipeLoop_t> IClientRemoteStorage_PipeLoop("IClientRemoteStorage::PipeLoop");
 
+	DetourHook<CAPIJob_RequestUserStats_t> CAPIJob_RequestUserStats("CAPIJob_RequestUserStats");
+
 	DetourHook<IClientUser_BIsSubscribedApp_t> IClientUser_BIsSubscribedApp("IClientUser::BIsSubscribedApp");
 	DetourHook<IClientUser_CheckAppOwnership_t> IClientUser_CheckAppOwnership("IClientUser::CheckAppOwnership");
 	DetourHook<IClientUser_IsUserSubscribedAppInTicket_t> IClientUser_IsUserSubscribedAppInTicket("IClientUser::IsUserSubscribedAppInTicket");
@@ -669,6 +681,7 @@ bool Hooks::setup()
 
 	bool succeeded =
 		LogSteamPipeCall.setup(Patterns::LogSteamPipeCall, MemHlp::SigFollowMode::Relative, &hkLogSteamPipeCall)
+		&& CAPIJob_RequestUserStats.setup(Patterns::CAPIJob_RequestUserStats, MemHlp::SigFollowMode::Relative, &hkCAPIJob_RequestUserStats)
 		&& IClientUser_BIsSubscribedApp.setup(Patterns::IsSubscribedApp, MemHlp::SigFollowMode::Relative, &hkClientUser_BIsSubscribedApp)
 		&& IClientUser_CheckAppOwnership.setup(Patterns::CheckAppOwnership, MemHlp::SigFollowMode::Relative, &hkClientUser_CheckAppOwnership)
 		&& IClientUser_IsUserSubscribedAppInTicket.setup(Patterns::IsUserSubscribedAppInTicket, MemHlp::SigFollowMode::Relative, &hkClientUser_IsUserSubscribedAppInTicket)
@@ -705,6 +718,7 @@ void Hooks::place()
 {
 	//Detours
 	LogSteamPipeCall.place();
+	CAPIJob_RequestUserStats.place();
 
 	IClientApps_PipeLoop.place();
 	IClientAppManager_PipeLoop.place();
@@ -723,6 +737,7 @@ void Hooks::remove()
 {
 	//Detours
 	LogSteamPipeCall.remove();
+	CAPIJob_RequestUserStats.remove();
 
 	IClientApps_PipeLoop.remove();
 	IClientAppManager_PipeLoop.remove();

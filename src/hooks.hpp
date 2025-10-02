@@ -72,6 +72,8 @@ namespace Hooks
 	typedef void(*IClientApps_PipeLoop_t)(void*, void*, void*, void*);
 	typedef void(*IClientRemoteStorage_PipeLoop_t)(void*, void*, void*, void*);
 
+	typedef uint32_t(*CAPIJob_RequestUserStats_t)(void*);
+
 	typedef bool(*IClientUser_BIsSubscribedApp_t)(void*, uint32_t);
 	typedef bool(*IClientUser_CheckAppOwnership_t)(void*, uint32_t, CAppOwnershipInfo*);
 	typedef uint32_t(*IClientUser_GetSubscribedApps_t)(void*, uint32_t*, size_t, bool);
@@ -83,6 +85,8 @@ namespace Hooks
 	extern DetourHook<IClientAppManager_PipeLoop_t> IClientAppManager_PipeLoop;
 	extern DetourHook<IClientApps_PipeLoop_t> IClientApps_PipeLoop;
 	extern DetourHook<IClientRemoteStorage_PipeLoop_t> IClientRemoteStorage_PipeLoop;
+
+	extern DetourHook<CAPIJob_RequestUserStats_t> CAPIJob_RequestUserStats;
 
 	extern DetourHook<IClientUser_BIsSubscribedApp_t> IClientUser_BIsSubscribedApp;
 	extern DetourHook<IClientUser_CheckAppOwnership_t> IClientUser_CheckAppOwnership;

@@ -169,6 +169,7 @@ bool CConfig::loadSettings()
 	g_pLog->info("WarnHashMissmatch: %i\n", warnHashMissmatch);
 	g_pLog->info("NotifyInit: %i\n", notifyInit);
 	g_pLog->info("ExtendedLogging: %i\n", extendedLogging);
+	g_pLog->info("LogLevel: %i\n", logLevel);
 	g_pLog->info("DenuvoSpoof: %i\n", denuvoSpoof);
 
 	//TODO: Create function to parse these kinda nodes, instead of c+p them

@@ -58,23 +58,23 @@ bool DLC::getDlcDataByIndex(uint32_t appId, int index, uint32_t* dlcId, bool* av
 		return false;
 	}
 
-	if (!g_config.shouldExcludeAppId(*dlcId))
-	{
-		*available = true;
-	}
-
 	if (g_config.dlcData.contains(appId))
 	{
 		auto& data = g_config.dlcData[appId];
 		auto dlc = std::next(data.dlcIds.begin(), index);
 
 		*dlcId = dlc->first;
+		*available = true;
 
 		//No clue if we have to check for errors during printf since the devs hopefully didn't fuck
 		//up the dlcNameLen. Who knows though
 		snprintf(dlcName, dlcNameLen, "%s", dlc->second.c_str());
 
 		return true;
+	}
+	else if (!g_config.shouldExcludeAppId(*dlcId))
+	{
+		*available = true;
 	}
 
 	return false;

@@ -15,6 +15,7 @@
 
 #include "feats/apps.hpp"
 #include "feats/dlc.hpp"
+#include "feats/ticket.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -437,6 +438,29 @@ static bool hkClientUser_CheckAppOwnership(void* pClientUser, uint32_t appId, CA
 	return ret;
 }
 
+static uint32_t hkClientUser_GetAppOwnershipTicketExtendedData(
+	void* pClientUser,
+	uint32_t appId,
+	void* pTicket,
+	uint32_t ticketSize,
+	uint32_t* a4,
+	uint32_t* a5,
+	uint32_t* a6,
+	uint32_t* a7)
+
+{
+	const uint32_t ret = Hooks::IClientUser_GetAppOwnershipTicketExtendedData.tramp.fn(pClientUser, appId, pTicket, ticketSize, a4, a5, a6, a7);
+	g_pLog->once("%s(%u)->%u\n", Hooks::IClientUser_GetAppOwnershipTicketExtendedData.name.c_str(), appId, ret);
+
+	const uint32_t sizeOverride = Ticket::getTicketOwnershipExtendedData(appId, pTicket, ret, a4);
+	if (sizeOverride)
+	{
+		return sizeOverride;
+	}
+
+	return ret;
+}
+
 static uint8_t hkClientUser_IsUserSubscribedAppInTicket(void* pClientUser, uint32_t steamId, uint32_t a2, uint32_t a3, uint32_t appId)
 {
 	const uint8_t ticketState = Hooks::IClientUser_IsUserSubscribedAppInTicket.tramp.fn(pClientUser, steamId, a2, a3, appId);
@@ -571,6 +595,17 @@ static bool createAndPlaceSteamIdHook()
 	//TODO: Dynamically resolve register which holds SteamId
 	MemHlp::assembleCodeAt(writeAddr, "mov [%p], ecx", &g_currentSteamId);
 
+	MemHlp::assembleCodeAt(writeAddr, "push eax", nullptr);
+
+	MemHlp::assembleCodeAt(writeAddr, "mov eax, [%p]", &Ticket::steamIdSpoof);
+	MemHlp::assembleCodeAt(writeAddr, "test eax, eax", nullptr);
+	MemHlp::assembleCodeAt(writeAddr, "je %p", 14); //2 bytes
+	MemHlp::assembleCodeAt(writeAddr, "mov ecx, eax", nullptr); //2 bytes
+	MemHlp::assembleCodeAt(writeAddr, "mov eax, 0", nullptr); //6 bytes
+	MemHlp::assembleCodeAt(writeAddr, "mov [%p], eax", &Ticket::steamIdSpoof); //6 bytes
+	//
+	MemHlp::assembleCodeAt(writeAddr, "pop eax", nullptr);
+
 	//Write the overwritten instructions after our hook code
 	for (unsigned int i = 0; i < instsToOverwrite; i++)
 	{
@@ -607,8 +642,9 @@ namespace Hooks
 
 	DetourHook<IClientUser_BIsSubscribedApp_t> IClientUser_BIsSubscribedApp("IClientUser::BIsSubscribedApp");
 	DetourHook<IClientUser_CheckAppOwnership_t> IClientUser_CheckAppOwnership("IClientUser::CheckAppOwnership");
-	DetourHook<IClientUser_IsUserSubscribedAppInTicket_t> IClientUser_IsUserSubscribedAppInTicket("IClientUser::IsUserSubscribedAppInTicket");
+	DetourHook<IClientUser_GetAppOwnershipTicketExtendedData_t> IClientUser_GetAppOwnershipTicketExtendedData("IClientUser::GetAppOwnershipTicketExtendedData");
 	DetourHook<IClientUser_GetSubscribedApps_t> IClientUser_GetSubscribedApps("IClientUser::GetSubscribedApps");
+	DetourHook<IClientUser_IsUserSubscribedAppInTicket_t> IClientUser_IsUserSubscribedAppInTicket("IClientUser::IsUserSubscribedAppInTicket");
 	DetourHook<IClientUser_RequiresLegacyCDKey_t> IClientUser_RequiresLegacyCDKey("IClientUser::RequiresLegacyCDKey");
 
 	VFTHook<IClientAppManager_BIsDlcEnabled_t> IClientAppManager_BIsDlcEnabled("IClientAppManager::BIsDlcEnabled");
@@ -686,6 +722,16 @@ bool Hooks::setup()
 		&hkClientUser_RequiresLegacyCDKey
 	);
 
+	bool getAppOwnershipTicketExtendedData = IClientUser_GetAppOwnershipTicketExtendedData.setup
+	(
+		Patterns::GetAppOwnershipTicketExtendedData,
+		MemHlp::SigFollowMode::PrologueUpwards,
+		&prologue[0],
+		prologue.size(),
+		&hkClientUser_GetAppOwnershipTicketExtendedData
+	);
+
+
 	bool succeeded =
 		LogSteamPipeCall.setup(Patterns::LogSteamPipeCall, MemHlp::SigFollowMode::Relative, &hkLogSteamPipeCall)
 		&& CAPIJob_RequestUserStats.setup(Patterns::CAPIJob_RequestUserStats, MemHlp::SigFollowMode::Relative, &hkCAPIJob_RequestUserStats)
@@ -701,7 +747,8 @@ bool Hooks::setup()
 		&& clientApps_PipeLoop
 		&& clientAppManager_PipeLoop
 		&& clientRemoteStorage_PipeLoop
-		&& requiresLegacyCDKey;
+		&& requiresLegacyCDKey
+		&& getAppOwnershipTicketExtendedData;
 
 	if (!succeeded)
 	{
@@ -733,6 +780,7 @@ void Hooks::place()
 
 	IClientUser_BIsSubscribedApp.place();
 	IClientUser_CheckAppOwnership.place();
+	IClientUser_GetAppOwnershipTicketExtendedData.place();
 	IClientUser_IsUserSubscribedAppInTicket.place();
 	IClientUser_GetSubscribedApps.place();
 	IClientUser_RequiresLegacyCDKey.place();
@@ -752,6 +800,7 @@ void Hooks::remove()
 
 	IClientUser_BIsSubscribedApp.remove();
 	IClientUser_CheckAppOwnership.remove();
+	IClientUser_GetAppOwnershipTicketExtendedData.remove();
 	IClientUser_IsUserSubscribedAppInTicket.remove();
 	IClientUser_GetSubscribedApps.remove();
 	IClientUser_RequiresLegacyCDKey.remove();

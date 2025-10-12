@@ -34,6 +34,8 @@ namespace Patterns
 	constexpr lm_string_t RequiresLegacyCDKey = "C3 ? ? ? ? ? 8B 44 24 ? 83 C4 1C 89 F9 89 F2 5B 5E 5F 5D 2D 94 18 00 00";
 	//Relative, not unique. All matches point to correct function though
 	constexpr lm_string_t GetSteamId = "E8 ? ? ? ? 89 D8 83 C4 0C 83 C4 08 5B C2 04 00 ? 83 EC 08 50 53 FF D2 89 D8 83 C4 0C 83 C4 08 5B C2 04 00";
+	//Mid function
+	constexpr lm_string_t GetAppOwnershipTicketExtendedData = "83 EC 24 FF 74 24 ? 8B 44 24";
 
 	//Relative
 	constexpr lm_string_t CAPIJob_RequestUserStats = "E8 ? ? ? ? 59 5E 50 89 C7";

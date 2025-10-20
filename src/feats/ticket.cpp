@@ -134,14 +134,14 @@ CEncryptedAppTicket Ticket::getCachedEncryptedTicket(uint32_t appId)
 	return ticket;
 }
 
-bool Ticket::saveEncryptedTicketToCache(uint32_t appId, uint32_t steamId, void* ticketData, uint32_t ticketSize)
+bool Ticket::saveEncryptedTicketToCache(uint32_t appId, uint32_t steamId, void* ticketData, uint32_t written)
 {
 	CEncryptedAppTicket ticket {};
 	g_pLog->debug("Saving encrypted ticket for %u...\n", appId);
 
 	ticket.steamId = steamId;
-	ticket.size = ticketSize;
-	memcpy(ticket.bytes, ticketData, ticketSize);
+	ticket.size = written;
+	memcpy(ticket.bytes, ticketData, written);
 
 	const auto path = getEncryptedTicketPath(appId);
 	std::ofstream ofs(path.c_str(), std::ios::out);
@@ -155,9 +155,9 @@ bool Ticket::saveEncryptedTicketToCache(uint32_t appId, uint32_t steamId, void* 
 	return true;
 }
 
-bool Ticket::getEncryptedAppTicket(void* ticketData, uint32_t* bytesWritten)
+bool Ticket::getEncryptedAppTicket(void* ticketData, uint32_t ticketSize, uint32_t* bytesWritten)
 {
-	if (!ticketData || !bytesWritten)
+	if (!ticketData || !ticketSize || !bytesWritten)
 	{
 		//This shouldn't happen, but some games seem to do it for some reason (possible a pitfall idk)
 		return false;
@@ -173,7 +173,7 @@ bool Ticket::getEncryptedAppTicket(void* ticketData, uint32_t* bytesWritten)
 
 	if (g_config.blockEncryptedAppTickets)
 	{
-		memset(ticketData, 0, 0x1000);
+		memset(ticketData, 0, ticketSize);
 		*bytesWritten = 0;
 	}
 
@@ -189,8 +189,15 @@ bool Ticket::getEncryptedAppTicket(void* ticketData, uint32_t* bytesWritten)
 		return false;
 	}
 
+	if (ticket.size > ticketSize)
+	{
+		g_pLog->debug("Failed to use use cached AppTicket for %u (Allocated size < bytesWritten)!\n");
+		return false;
+	}
+
+	//We're running on the assumption that tickets won't be bigger than 0x1000 bytes
 	tempSteamIdSpoof = ticket.steamId;
-	memcpy(ticketData, ticket.bytes, ticket.size);
+	memcpy(ticketData, ticket.bytes, ticketSize);
 	*bytesWritten = ticket.size;
 
 	return true;

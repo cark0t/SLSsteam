@@ -26,8 +26,8 @@ namespace Ticket
 
 	std::string getEncryptedTicketPath(uint32_t appId);
 	CEncryptedAppTicket getCachedEncryptedTicket(uint32_t appId);
-	bool saveEncryptedTicketToCache(uint32_t appId, uint32_t steamId, void* ticketData, uint32_t ticketSize);
+	bool saveEncryptedTicketToCache(uint32_t appId, uint32_t steamId, void* ticketData, uint32_t written);
 
-	bool getEncryptedAppTicket(void* ticketData, uint32_t* bytesWritten);
+	bool getEncryptedAppTicket(void* ticketData, uint32_t ticketSize, uint32_t* bytesWritten);
 	bool getAPICallResult(ECallbackType type, void* pCallback);
 }

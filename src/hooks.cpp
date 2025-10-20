@@ -552,7 +552,7 @@ static bool hkClientUser_GetEncryptedAppTicket(void* pClientUser, void* pTicket,
 		ret
 	);
 
-	if (Ticket::getEncryptedAppTicket(pTicket, pBytesWritten))
+	if (Ticket::getEncryptedAppTicket(pTicket, maxSize, pBytesWritten))
 	{
 		return true;
 	}

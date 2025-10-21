@@ -36,7 +36,7 @@ def main() -> int:
             if "=" not in line:
                 continue
 
-            split = line.split("=")
+            split = line.split("=", 1)
             if split[0] == "account_steamid":
                 steam_id = SteamId(int(split[1].strip()))
             elif split[0] == "ticket":

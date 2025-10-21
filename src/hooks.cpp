@@ -431,6 +431,31 @@ static bool hkClientUser_BIsSubscribedApp(void* pClientUser, uint32_t appId)
 	return ret;
 }
 
+static bool hkClientUser_BLoggedOn(void* pClientUser)
+{
+	const bool ret = Hooks::IClientUser_BLoggedOn.tramp.fn(pClientUser);
+	//Useless logging
+	//g_pLog->debug
+	//(
+	//	"%s(%p) -> %i\n",
+	//	Hooks::IClientUser_BLoggedOn.name.c_str(),
+	//	pClientUser,
+	//	ret
+	//);
+	
+	if (g_config.fakeOffline && g_pClientUtils)
+	{
+		const uint32_t appId = g_pClientUtils->getAppId();
+		if (g_config.isAddedAppId(appId))
+		{
+			g_pLog->once("Faking no connection for %u\n", appId);
+			return false;
+		}
+	}
+
+	return ret;
+}
+
 __attribute__((hot))
 static bool hkClientUser_CheckAppOwnership(void* pClientUser, uint32_t appId, CAppOwnershipInfo* pOwnershipInfo)
 {
@@ -639,6 +664,11 @@ static void hkClientUser_PipeLoop(void* pClientUser, void* a1, void* a2, void* a
 {
 	g_pClientUser = reinterpret_cast<IClientUser*>(pClientUser);
 
+	//std::shared_ptr<lm_vmt_t> vft = std::make_shared<lm_vmt_t>();
+	//LM_VmtNew(*reinterpret_cast<lm_address_t**>(pClientUser), vft.get());
+
+	//g_pLog->debug("IClientUser->vft at %p\n", vft->vtable);
+
 	Hooks::IClientUser_PipeLoop.remove();
 	Hooks::IClientUser_PipeLoop.originalFn.fn(pClientUser, a1, a2, a3);
 }
@@ -776,6 +806,7 @@ namespace Hooks
 	DetourHook<CAPIJob_RequestUserStats_t> CAPIJob_RequestUserStats("CAPIJob_RequestUserStats");
 
 	DetourHook<IClientUser_BIsSubscribedApp_t> IClientUser_BIsSubscribedApp("IClientUser::BIsSubscribedApp");
+	DetourHook<IClientUser_BLoggedOn_t> IClientUser_BLoggedOn("IClientUser::BLoggedOn");
 	DetourHook<IClientUser_CheckAppOwnership_t> IClientUser_CheckAppOwnership("IClientUser::CheckAppOwnership");
 	DetourHook<IClientUser_GetAPICallResult_t> IClientUser_GetAPICallResult("IClientUser::GetAPICallResult");
 	DetourHook<IClientUser_GetAppOwnershipTicketExtendedData_t> IClientUser_GetAppOwnershipTicketExtendedData("IClientUser::GetAppOwnershipTicketExtendedData");
@@ -900,6 +931,7 @@ bool Hooks::setup()
 		LogSteamPipeCall.setup(Patterns::LogSteamPipeCall, MemHlp::SigFollowMode::Relative, &hkLogSteamPipeCall)
 		&& CAPIJob_RequestUserStats.setup(Patterns::CAPIJob_RequestUserStats, MemHlp::SigFollowMode::Relative, &hkCAPIJob_RequestUserStats)
 		&& IClientUser_BIsSubscribedApp.setup(Patterns::IsSubscribedApp, MemHlp::SigFollowMode::Relative, &hkClientUser_BIsSubscribedApp)
+		&& IClientUser_BLoggedOn.setup(Patterns::BLoggedOn, MemHlp::SigFollowMode::Relative, &hkClientUser_BLoggedOn)
 		&& IClientUser_CheckAppOwnership.setup(Patterns::CheckAppOwnership, MemHlp::SigFollowMode::Relative, &hkClientUser_CheckAppOwnership)
 		&& IClientUser_GetAPICallResult.setup(Patterns::GetAPICallResult, MemHlp::SigFollowMode::Relative, &hkClientUser_GetAPICallResult)
 		&& IClientUser_IsUserSubscribedAppInTicket.setup(Patterns::IsUserSubscribedAppInTicket, MemHlp::SigFollowMode::Relative, &hkClientUser_IsUserSubscribedAppInTicket)
@@ -949,6 +981,7 @@ void Hooks::place()
 	IClientUser_PipeLoop.place();
 
 	IClientUser_BIsSubscribedApp.place();
+	IClientUser_BLoggedOn.place();
 	IClientUser_CheckAppOwnership.place();
 	IClientUser_GetAPICallResult.place();
 	IClientUser_GetEncryptedAppTicket.place();
@@ -973,6 +1006,7 @@ void Hooks::remove()
 	IClientUser_PipeLoop.remove();
 
 	IClientUser_BIsSubscribedApp.remove();
+	IClientUser_BLoggedOn.remove();
 	IClientUser_CheckAppOwnership.remove();
 	IClientUser_GetAPICallResult.remove();
 	IClientUser_GetEncryptedAppTicket.remove();

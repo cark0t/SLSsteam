@@ -28,6 +28,7 @@ namespace VFTIndexes
 
 	namespace IClientUser
 	{
+		constexpr int BLoggedOn = 4;
 		constexpr int GetSteamID = 10;
 	}
 

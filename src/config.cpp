@@ -43,6 +43,8 @@ static const char* defaultConfig =
 "#Extra Data for Dlcs belonging to a specific AppId. Only needed\n"
 "#when the App you're playing is hit by Steams 64 DLC limit\n"
 "DlcData:\n\n"
+"#Fake Steam being offline for AdditionalApps (also affects stuff unlocked by PlayNotOwnedGames)\n"
+"FakeOffline: no\n\n"
 "#Blocks games from unlocking on wrong accounts\n"
 "DenuvoGames:\n\n"
 "#Spoof Denuvo Games owner instead of blocking them\n"
@@ -154,6 +156,7 @@ bool CConfig::loadSettings()
 	useWhiteList = getSetting<bool>(node, "UseWhitelist", false);
 	automaticFilter = getSetting<bool>(node, "AutoFilterList", true);
 	playNotOwnedGames = getSetting<bool>(node, "PlayNotOwnedGames", false);
+	fakeOffline = getSetting<bool>(node, "FakeOffline", false);
 	safeMode = getSetting<bool>(node, "SafeMode", false);
 	notifications = getSetting<bool>(node, "Notifications", true);
 	warnHashMissmatch = getSetting<bool>(node, "WarnHashMissmatch", false);
@@ -168,6 +171,7 @@ bool CConfig::loadSettings()
 	g_pLog->info("UseWhitelist: %i\n", useWhiteList);
 	g_pLog->info("AutoFilterList: %i\n", automaticFilter);
 	g_pLog->info("PlayNotOwnedGames: %i\n", playNotOwnedGames);
+	g_pLog->info("FakeOffline: %i\n", fakeOffline);
 	g_pLog->info("SafeMode: %i\n", safeMode);
 	g_pLog->info("Notifications: %i\n", notifications);
 	g_pLog->info("WarnHashMissmatch: %i\n", warnHashMissmatch);

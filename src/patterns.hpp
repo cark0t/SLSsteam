@@ -46,4 +46,7 @@ namespace Patterns
 	constexpr lm_string_t GetAPICallResult = "E8 ? ? ? ? 83 C4 20 84 C0 75 ? 8B 86 ? ? ? ? 83 C0 0F";
 	//Mid Function
 	constexpr lm_string_t GetEncryptedAppTicket = "8D 7A ? 83 EC 0C 57 E8 ? ? ? ? 83 C4 10";
+
+	//Relative
+	constexpr lm_string_t BLoggedOn = "E9 ? ? ? ? ? ? ? ? ? ? 5B 5E 5F FF E0";
 }

@@ -4,6 +4,7 @@
 #include "../globals.hpp"
 
 #include "../sdk/IClientUtils.hpp"
+#include "../sdk/EResult.hpp"
 
 #include <cstring>
 #include <filesystem>
@@ -13,6 +14,7 @@
 
 uint32_t Ticket::oneTimeSteamIdSpoof = 0;
 uint32_t Ticket::tempSteamIdSpoof = 0;
+std::map<uint32_t, CAppTicket> Ticket::ticketMap = std::map<uint32_t, CAppTicket>();
 std::map<uint32_t, CEncryptedAppTicket> Ticket::encryptedTicketMap = std::map<uint32_t, CEncryptedAppTicket>();
 
 std::string Ticket::getTicketDir()
@@ -39,6 +41,11 @@ std::string Ticket::getTicketPath(uint32_t appId)
 
 CAppTicket Ticket::getCachedTicket(uint32_t appId)
 {
+	if (ticketMap.contains(appId))
+	{
+		return ticketMap[appId];
+	}
+
 	CAppTicket ticket {};
 
 	const auto path = getTicketPath(appId);
@@ -57,14 +64,15 @@ CAppTicket Ticket::getCachedTicket(uint32_t appId)
 	return ticket;
 }
 
-bool Ticket::saveTicketToCache(uint32_t appId, void* ticketData, uint32_t ticketSize, uint32_t* a4)
+bool Ticket::saveTicketToCache(uint32_t appId, void* ticketData, uint32_t ticketSize)
 {
 	CAppTicket ticket {};
 	g_pLog->debug("Saving ticket for %u...\n", appId);
 
 	//steamId is in ticket too, but whatever
+	ticket.steamId = g_currentSteamId;
+	ticket.size = ticketSize;
 	memcpy(ticket.bytes, ticketData, ticketSize);
-	memcpy(ticket.extraData, a4, sizeof(ticket.extraData));
 
 	const auto path = getTicketPath(appId);
 	std::ofstream ofs(path.c_str(), std::ios::out);
@@ -72,31 +80,49 @@ bool Ticket::saveTicketToCache(uint32_t appId, void* ticketData, uint32_t ticket
 	ofs.write(reinterpret_cast<char*>(&ticket), sizeof(ticket));
 
 	g_pLog->once("Saved ticket for %u\n", appId);
+
+	ticketMap[appId] = ticket;
 	
 	return true;
 }
 
-uint32_t Ticket::getTicketOwnershipExtendedData(uint32_t appId, void* ticket, uint32_t ticketSize, uint32_t* a4)
+void Ticket::recvAppOwnershipTicketResponse(CMsgAppOwnershipTicketResponse* resp)
 {
-	if (ticketSize)
-	{
-		saveTicketToCache(appId, ticket, ticketSize, a4);
-		return 0;
-	}
+	//Very weird way to store data, thanks GCC
+	//TODO: Maybe dig in further to improve my classes
+	uint32_t* pSize = (reinterpret_cast<uint32_t*>(*resp->ppTicket) - 3);
 
+	switch (resp->result)
+	{
+
+		case ERESULT_OK:
+			saveTicketToCache(resp->appId, *resp->ppTicket, *pSize);
+			return;
+
+		case ERESULT_ACCESS_DENIED:
+			const auto cached = getCachedTicket(resp->appId);
+			if (!cached.steamId)
+			{
+				return;
+			}
+
+			memcpy(*resp->ppTicket, cached.bytes, 0x400);
+			*pSize = cached.size;
+			resp->result = ERESULT_OK;
+			break;
+	}
+}
+
+void Ticket::getTicketOwnershipExtendedData(uint32_t appId)
+{
 	const CAppTicket cached = Ticket::getCachedTicket(appId);
-	const uint32_t size = cached.getSize();
-	if (!size)
+	const uint32_t steamId = cached.steamId;
+	if (!steamId)
 	{
-		return 0;
+		return;
 	}
 
-	oneTimeSteamIdSpoof = cached.getSteamId();
-
-	memcpy(ticket, cached.bytes, size);
-	memcpy(a4, cached.extraData, sizeof(cached.extraData));
-
-	return size;
+	oneTimeSteamIdSpoof = steamId;
 }
 
 std::string Ticket::getEncryptedTicketPath(uint32_t appId)

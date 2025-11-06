@@ -49,4 +49,7 @@ namespace Patterns
 
 	//Relative
 	constexpr lm_string_t BLoggedOn = "E9 ? ? ? ? ? ? ? ? ? ? 5B 5E 5F FF E0";
+
+	//Relative
+	constexpr lm_string_t ParseProtoBufResponse = "E8 ? ? ? ? 58 8B 45 ? 8B 8D";
 }

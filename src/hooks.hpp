@@ -67,6 +67,7 @@ public:
 namespace Hooks
 {
 	typedef void(*LogSteamPipeCall_t)(const char*, const char*);
+	typedef void(*ParseProtoBufResponse_t)(void*, void*);
 
 	typedef void(*IClientAppManager_PipeLoop_t)(void*, void*, void*, void*);
 	typedef void(*IClientApps_PipeLoop_t)(void*, void*, void*, void*);
@@ -87,6 +88,7 @@ namespace Hooks
 	typedef bool(*IClientUser_RequiresLegacyCDKey_t)(void*, uint32_t, uint32_t*);
 
 	extern DetourHook<LogSteamPipeCall_t> LogSteamPipeCall;
+	extern DetourHook<ParseProtoBufResponse_t> ParseProtoBufResponse;
 
 	extern DetourHook<IClientAppManager_PipeLoop_t> IClientAppManager_PipeLoop;
 	extern DetourHook<IClientApps_PipeLoop_t> IClientApps_PipeLoop;

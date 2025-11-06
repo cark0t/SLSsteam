@@ -4,6 +4,7 @@
 #include "log.hpp"
 #include "memhlp.hpp"
 #include "patterns.hpp"
+#include "sdk/CProtoBufMsgBase.hpp"
 #include "vftableinfo.hpp"
 
 #include "libmem/libmem.h"
@@ -160,6 +161,30 @@ static void hkLogSteamPipeCall(const char* iface, const char* fn)
 			iface,
 			fn
 		);
+	}
+}
+
+static void hkParseProtoBufResponse(void* pDst, void* pSrc)
+{
+	Hooks::ParseProtoBufResponse.tramp.fn(pDst, pSrc);
+
+	//Safety first
+	if (!pDst || !pSrc)
+	{
+		return;
+	}
+
+	const CProtoBufMsgBase* msg = reinterpret_cast<CProtoBufMsgBase*>(pDst);
+
+	switch(msg->type)
+	{
+		case EMSG_APPOWNERSHIPTICKET_RESPONSE:
+			const auto resp = reinterpret_cast<CMsgAppOwnershipTicketResponse*>(msg->body);
+			g_pLog->debug("AppOwnershipTicketResp %i -> %i\n", resp->appId, resp->result);
+
+			Ticket::recvAppOwnershipTicketResponse(resp);
+
+			break;
 	}
 }
 
@@ -525,11 +550,7 @@ static uint32_t hkClientUser_GetAppOwnershipTicketExtendedData(
 	const uint32_t ret = Hooks::IClientUser_GetAppOwnershipTicketExtendedData.tramp.fn(pClientUser, appId, pTicket, ticketSize, a4, a5, a6, a7);
 	g_pLog->once("%s(%u)->%u\n", Hooks::IClientUser_GetAppOwnershipTicketExtendedData.name.c_str(), appId, ret);
 
-	const uint32_t sizeOverride = Ticket::getTicketOwnershipExtendedData(appId, pTicket, ret, a4);
-	if (sizeOverride)
-	{
-		return sizeOverride;
-	}
+	Ticket::getTicketOwnershipExtendedData(appId);
 
 	return ret;
 }
@@ -796,6 +817,7 @@ namespace Hooks
 {
 	//TODO: Replace logging in hooks with Hook::name
 	DetourHook<LogSteamPipeCall_t> LogSteamPipeCall("LogSteamPipeCall");
+	DetourHook<ParseProtoBufResponse_t> ParseProtoBufResponse("ParseProtoBufResponse");
 
 	DetourHook<IClientAppManager_PipeLoop_t> IClientAppManager_PipeLoop("IClientAppManager::PipeLoop");
 	DetourHook<IClientApps_PipeLoop_t> IClientApps_PipeLoop("IClientApps::PipeLoop");
@@ -929,6 +951,7 @@ bool Hooks::setup()
 
 	bool succeeded =
 		LogSteamPipeCall.setup(Patterns::LogSteamPipeCall, MemHlp::SigFollowMode::Relative, &hkLogSteamPipeCall)
+		&& ParseProtoBufResponse.setup(Patterns::ParseProtoBufResponse, MemHlp::SigFollowMode::Relative, &hkParseProtoBufResponse)
 		&& CAPIJob_RequestUserStats.setup(Patterns::CAPIJob_RequestUserStats, MemHlp::SigFollowMode::Relative, &hkCAPIJob_RequestUserStats)
 		&& IClientUser_BIsSubscribedApp.setup(Patterns::IsSubscribedApp, MemHlp::SigFollowMode::Relative, &hkClientUser_BIsSubscribedApp)
 		&& IClientUser_BLoggedOn.setup(Patterns::BLoggedOn, MemHlp::SigFollowMode::Relative, &hkClientUser_BLoggedOn)
@@ -972,6 +995,7 @@ void Hooks::place()
 {
 	//Detours
 	LogSteamPipeCall.place();
+	ParseProtoBufResponse.place();
 	CAPIJob_RequestUserStats.place();
 
 	IClientApps_PipeLoop.place();
@@ -997,6 +1021,7 @@ void Hooks::remove()
 {
 	//Detours
 	LogSteamPipeCall.remove();
+	ParseProtoBufResponse.remove();
 	CAPIJob_RequestUserStats.remove();
 
 	IClientApps_PipeLoop.remove();

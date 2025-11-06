@@ -60,6 +60,8 @@ CAppTicket Ticket::getCachedTicket(uint32_t appId)
 
 	ifs.read(reinterpret_cast<char*>(&ticket), sizeof ticket);
 	//g_pLog->debug("Ticket: %u, %u, %u\n", ticket.getSteamId(), ticket.getAppId(), ticket.getSize());
+	
+	ticketMap[appId] = ticket;
 
 	return ticket;
 }

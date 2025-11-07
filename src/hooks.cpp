@@ -483,8 +483,8 @@ static bool hkClientUser_BLoggedOn(void* pClientUser)
 
 static uint32_t hkClientUser_BUpdateOwnershipInfo(void* pClientUser, uint32_t appId, bool staleOnly)
 {
-	const auto ticket = Ticket::getCachedTicket(appId);
-	if (!g_config.isAddedAppId(appId) && !ticket.steamId)
+	const auto cached = Ticket::getCachedTicket(appId);
+	if (!g_config.isAddedAppId(appId) && !cached.steamId)
 	{
 		staleOnly = false;
 		g_pLog->debug("Force re-requesting OwnershipInfo for %u\n", appId);

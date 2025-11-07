@@ -6,6 +6,7 @@
 #include "../sdk/IClientUtils.hpp"
 #include "../sdk/EResult.hpp"
 
+#include <chrono>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -71,10 +72,7 @@ bool Ticket::saveTicketToCache(uint32_t appId, void* ticketData, uint32_t ticket
 	CAppTicket ticket {};
 	g_pLog->debug("Saving ticket for %u...\n", appId);
 
-	//steamId is in ticket too, but whatever
-	ticket.steamId = g_currentSteamId;
-	ticket.size = ticketSize;
-	memcpy(ticket.bytes, ticketData, ticketSize);
+	memcpy(&ticket, ticketData, ticketSize);
 
 	const auto path = getTicketPath(appId);
 	std::ofstream ofs(path.c_str(), std::ios::out);
@@ -102,14 +100,22 @@ void Ticket::recvAppOwnershipTicketResponse(CMsgAppOwnershipTicketResponse* resp
 			return;
 
 		case ERESULT_ACCESS_DENIED:
-			const auto cached = getCachedTicket(resp->appId);
+			auto cached = getCachedTicket(resp->appId);
 			if (!cached.steamId)
 			{
 				return;
 			}
 
-			memcpy(*resp->ppTicket, cached.bytes, 0x400);
-			*pSize = cached.size;
+			const uint32_t size = cached.getSize();
+
+			//cached.issueTime = std::chrono::duration_cast<std::chrono::seconds>
+			//(
+			//	std::chrono::system_clock::now().time_since_epoch()
+			//).count();
+			//TODO: Somehow resign ticket after updating issue time
+
+			memcpy(*resp->ppTicket, &cached, 0x400);
+			*pSize = size;
 			resp->result = ERESULT_OK;
 			break;
 	}

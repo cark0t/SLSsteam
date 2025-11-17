@@ -38,6 +38,12 @@ namespace Patterns
 		extern Pattern_t RequestUserStats;
 	}
 
+	namespace CSteamEngine
+	{
+		extern Pattern_t GetAPICallResult;
+		extern Pattern_t SetAppIdForCurrentPipe;
+	}
+
 	namespace CUser
 	{
 		//TODO: Order & Convert old patterns
@@ -69,7 +75,6 @@ namespace Patterns
 		extern Pattern_t BIsSubscribedApp;
 		extern Pattern_t BLoggedOn;
 		extern Pattern_t BUpdateAppOwnershipInfo;
-		extern Pattern_t GetAPICallResult;
 		extern Pattern_t GetAppOwnershipTicketExtendedData;
 		extern Pattern_t GetSteamId;
 		extern Pattern_t IsUserSubscribedAppInTicket;

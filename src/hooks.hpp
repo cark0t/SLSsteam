@@ -78,6 +78,9 @@ namespace Hooks
 
 	typedef uint32_t(*CAPIJob_RequestUserStats_t)(void*);
 
+	typedef bool(*CSteamEngine_GetAPICallResult_t)(void*, uint32_t, uint32_t, void*, uint32_t, uint32_t, bool*);
+	typedef bool(*CSteamEngine_SetAppIdForCurrentPipe_t)(void*, uint32_t, bool);
+
 	typedef bool(*CUser_CheckAppOwnership_t)(void*, uint32_t, CAppOwnershipInfo*);
 	typedef bool(*CUser_GetEncryptedAppTicket_t)(void*, void*, uint32_t, uint32_t*);
 	typedef uint32_t(*CUser_GetSubscribedApps_t)(void*, uint32_t*, size_t, bool);
@@ -85,7 +88,6 @@ namespace Hooks
 	typedef bool(*IClientUser_BIsSubscribedApp_t)(void*, uint32_t);
 	typedef bool(*IClientUser_BLoggedOn_t)(void*);
 	typedef uint32_t(*IClientUser_BUpdateAppOwnershipInfo_t)(void*, uint32_t, bool);
-	typedef bool(*IClientUser_GetAPICallResult_t)(void*, uint32_t, uint32_t, void*, uint32_t, uint32_t, bool*);
 	typedef uint32_t(*IClientUser_GetAppOwnershipTicketExtendedData_t)(void*, uint32_t, void*, uint32_t, uint32_t*, uint32_t*, uint32_t*, uint32_t*);
 	typedef uint8_t(*IClientUser_IsUserSubscribedAppInTicket_t)(void*, uint32_t, uint32_t, uint32_t, uint32_t);
 	typedef bool(*IClientUser_RequiresLegacyCDKey_t)(void*, uint32_t, uint32_t*);
@@ -103,6 +105,9 @@ namespace Hooks
 
 	extern DetourHook<CAPIJob_RequestUserStats_t> CAPIJob_RequestUserStats;
 
+	extern DetourHook<CSteamEngine_GetAPICallResult_t> CSteamEngine_GetAPICallResult;
+	extern DetourHook<CSteamEngine_SetAppIdForCurrentPipe_t> CSteamEngine_SetAppIdForCurrentPipe;
+
 	extern DetourHook<CUser_CheckAppOwnership_t> CUser_CheckAppOwnership;
 	extern DetourHook<CUser_GetEncryptedAppTicket_t> CUser_GetEncryptedAppTicket;
 	extern DetourHook<CUser_GetSubscribedApps_t> CUser_GetSubscribedApps;
@@ -110,7 +115,6 @@ namespace Hooks
 	extern DetourHook<IClientUser_BIsSubscribedApp_t> IClientUser_BIsSubscribedApp;
 	extern DetourHook<IClientUser_BLoggedOn_t> IClientUser_BLoggedOn;
 	extern DetourHook<IClientUser_BUpdateAppOwnershipInfo_t> IClientUser_BUpdateAppOwnershipInfo;
-	extern DetourHook<IClientUser_GetAPICallResult_t> IClientUser_GetAPICallResult;
 	extern DetourHook<IClientUser_GetAppOwnershipTicketExtendedData_t> IClientUser_GetAppOwnershipTicketExtendedData;
 	extern DetourHook<IClientUser_IsUserSubscribedAppInTicket_t> IClientUser_IsUserSubscribedAppInTicket;
 	extern DetourHook<IClientUser_RequiresLegacyCDKey_t> IClientUser_RequiresLegacyCDKey;

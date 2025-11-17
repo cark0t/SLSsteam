@@ -213,6 +213,60 @@ static uint32_t hkCAPIJob_RequestUserStats(void* a0)
 }
 
 __attribute__((hot))
+static bool hkSteamEngine_GetAPICallResult(void* pSteamEngine, uint32_t callbackHandle, uint32_t a2, void* pCallback, uint32_t callbackSize, uint32_t type, bool* pbFailed)
+{
+	const auto ret = Hooks::CSteamEngine_GetAPICallResult.tramp.fn(pSteamEngine, callbackHandle, a2, pCallback, callbackSize, type, pbFailed);
+
+	if (g_config.extendedLogging)
+	{
+		g_pLog->debug
+		(
+			"%s(%p, %p, %p, %p, %u, %p, %p) -> %i\n",
+
+			Hooks::CSteamEngine_GetAPICallResult.name.c_str(),
+			pSteamEngine,
+			callbackHandle,
+			a2,
+			pCallback,
+			callbackSize,
+			type,
+			pbFailed,
+			ret
+		);
+	}
+
+	if (Ticket::getAPICallResult(static_cast<ECallbackType>(type), pCallback))
+	{
+		return true;
+	}
+
+	return ret;
+}
+
+static bool hkSteamEngine_SetAppIdForCurrentPipe(void* pSteamEngine, uint32_t appId, bool a2)
+{
+	if (g_config.isAddedAppId(appId))
+	{
+		appId = 440; //Tf2
+	}
+
+	const bool ret = Hooks::CSteamEngine_SetAppIdForCurrentPipe.tramp.fn(pSteamEngine, appId, a2);
+
+	g_pLog->debug
+	(
+		"%s(%p, %u, %i) -> %i\n",
+
+		Hooks::CSteamEngine_SetAppIdForCurrentPipe.name.c_str(),
+		pSteamEngine,
+		appId,
+		a2,
+		ret
+	);
+
+	return ret;
+}
+
+__attribute__((hot))
 static bool hkUser_CheckAppOwnership(void* pClientUser, uint32_t appId, CAppOwnershipInfo* pOwnershipInfo)
 {
 	if (!g_pUser)
@@ -591,37 +645,6 @@ static uint32_t hkClientUser_BUpdateOwnershipInfo(void* pClientUser, uint32_t ap
 	return ret;
 }
 
-__attribute__((hot))
-static bool hkClientUser_GetAPICallResult(void* pClientUser, uint32_t callbackHandle, uint32_t a2, void* pCallback, uint32_t callbackSize, uint32_t type, bool* pbFailed)
-{
-	const auto ret = Hooks::IClientUser_GetAPICallResult.tramp.fn(pClientUser, callbackHandle, a2, pCallback, callbackSize, type, pbFailed);
-
-	if (g_config.extendedLogging)
-	{
-		g_pLog->debug
-		(
-			"%s(%p, %p, %p, %p, %u, %p, %p) -> %i\n",
-
-			Hooks::IClientUser_GetAPICallResult.name.c_str(),
-			pClientUser,
-			callbackHandle,
-			a2,
-			pCallback,
-			callbackSize,
-			type,
-			pbFailed,
-			ret
-		);
-	}
-
-	if (Ticket::getAPICallResult(static_cast<ECallbackType>(type), pCallback))
-	{
-		return true;
-	}
-
-	return ret;
-}
-
 static uint32_t hkClientUser_GetAppOwnershipTicketExtendedData(
 	void* pClientUser,
 	uint32_t appId,
@@ -865,6 +888,9 @@ namespace Hooks
 	DetourHook<IClientUtils_PipeLoop_t> IClientUtils_PipeLoop;
 	DetourHook<IClientUser_PipeLoop_t> IClientUser_PipeLoop;
 
+	DetourHook<CSteamEngine_GetAPICallResult_t> CSteamEngine_GetAPICallResult;
+	DetourHook<CSteamEngine_SetAppIdForCurrentPipe_t> CSteamEngine_SetAppIdForCurrentPipe;
+
 	DetourHook<CAPIJob_RequestUserStats_t> CAPIJob_RequestUserStats;
 
 	DetourHook<CUser_CheckAppOwnership_t> CUser_CheckAppOwnership;
@@ -874,7 +900,6 @@ namespace Hooks
 	DetourHook<IClientUser_BIsSubscribedApp_t> IClientUser_BIsSubscribedApp;
 	DetourHook<IClientUser_BLoggedOn_t> IClientUser_BLoggedOn;
 	DetourHook<IClientUser_BUpdateAppOwnershipInfo_t> IClientUser_BUpdateAppOwnershipInfo;
-	DetourHook<IClientUser_GetAPICallResult_t> IClientUser_GetAPICallResult;
 	DetourHook<IClientUser_GetAppOwnershipTicketExtendedData_t> IClientUser_GetAppOwnershipTicketExtendedData;
 	DetourHook<IClientUser_IsUserSubscribedAppInTicket_t> IClientUser_IsUserSubscribedAppInTicket;
 	DetourHook<IClientUser_RequiresLegacyCDKey_t> IClientUser_RequiresLegacyCDKey;
@@ -910,6 +935,9 @@ bool Hooks::setup()
 		&& CUser_GetSubscribedApps.setup(Patterns::CUser::GetSubscribedApps, &hkUser_GetSubscribedApps)
 		&& CUser_GetEncryptedAppTicket.setup(Patterns::CUser::GetEncryptedAppTicket, hkUser_GetEncryptedAppTicket)
 
+		&& CSteamEngine_GetAPICallResult.setup(Patterns::CSteamEngine::GetAPICallResult, &hkSteamEngine_GetAPICallResult)
+		&& CSteamEngine_SetAppIdForCurrentPipe.setup(Patterns::CSteamEngine::SetAppIdForCurrentPipe, &hkSteamEngine_SetAppIdForCurrentPipe)
+
 		&& IClientApps_PipeLoop.setup(Patterns::IClientApps::PipeLoop, hkClientApps_PipeLoop)
 		&& IClientAppManager_PipeLoop.setup(Patterns::IClientAppManager::PipeLoop, hkClientAppManager_PipeLoop)
 		&& IClientRemoteStorage_PipeLoop.setup(Patterns::IClientRemoteStorage::PipeLoop, hkClientRemoteStorage_PipeLoop)
@@ -920,7 +948,6 @@ bool Hooks::setup()
 		&& IClientUser_BLoggedOn.setup(Patterns::IClientUser::BLoggedOn, &hkClientUser_BLoggedOn)
 		&& IClientUser_BUpdateAppOwnershipInfo.setup(Patterns::IClientUser::BUpdateAppOwnershipInfo, hkClientUser_BUpdateOwnershipInfo)
 		&& IClientUser_GetAppOwnershipTicketExtendedData.setup(Patterns::IClientUser::GetAppOwnershipTicketExtendedData, hkClientUser_GetAppOwnershipTicketExtendedData)
-		&& IClientUser_GetAPICallResult.setup(Patterns::IClientUser::GetAPICallResult, &hkClientUser_GetAPICallResult)
 		&& IClientUser_IsUserSubscribedAppInTicket.setup(Patterns::IClientUser::IsUserSubscribedAppInTicket, &hkClientUser_IsUserSubscribedAppInTicket)
 		&& IClientUser_RequiresLegacyCDKey.setup(Patterns::IClientUser::RequiresLegacyCDKey, hkClientUser_RequiresLegacyCDKey);
 
@@ -943,6 +970,9 @@ void Hooks::place()
 
 	CAPIJob_RequestUserStats.place();
 
+	CSteamEngine_GetAPICallResult.place();
+	CSteamEngine_SetAppIdForCurrentPipe.place();
+
 	CUser_CheckAppOwnership.place();
 	CUser_GetEncryptedAppTicket.place();
 	CUser_GetSubscribedApps.place();
@@ -956,7 +986,6 @@ void Hooks::place()
 	IClientUser_BIsSubscribedApp.place();
 	IClientUser_BLoggedOn.place();
 	IClientUser_BUpdateAppOwnershipInfo.place();
-	IClientUser_GetAPICallResult.place();
 	IClientUser_GetAppOwnershipTicketExtendedData.place();
 	IClientUser_IsUserSubscribedAppInTicket.place();
 	IClientUser_RequiresLegacyCDKey.place();
@@ -972,6 +1001,9 @@ void Hooks::remove()
 
 	CAPIJob_RequestUserStats.remove();
 
+	CSteamEngine_GetAPICallResult.remove();
+	CSteamEngine_SetAppIdForCurrentPipe.remove();
+
 	CUser_CheckAppOwnership.remove();
 	CUser_GetEncryptedAppTicket.remove();
 	CUser_GetSubscribedApps.remove();
@@ -985,7 +1017,6 @@ void Hooks::remove()
 	IClientUser_BIsSubscribedApp.remove();
 	IClientUser_BLoggedOn.remove();
 	IClientUser_BUpdateAppOwnershipInfo.remove();
-	IClientUser_GetAPICallResult.remove();
 	IClientUser_GetAppOwnershipTicketExtendedData.remove();
 	IClientUser_IsUserSubscribedAppInTicket.remove();
 	IClientUser_RequiresLegacyCDKey.remove();

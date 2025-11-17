@@ -84,6 +84,22 @@ namespace Patterns
 		};
 	}
 
+	namespace CSteamEngine
+	{
+		Pattern_t GetAPICallResult
+		{
+			"IClientUser::GetAPICallResult",
+			"E8 ? ? ? ? 83 C4 20 84 C0 75 ? 8B 86 ? ? ? ? 83 C0 0F",
+			SigFollowMode::Relative
+		};
+		Pattern_t SetAppIdForCurrentPipe
+		{
+			"CSteamEngine::SetAppIdForCurrentPipe",
+			"E8 ? ? ? ? E9 ? ? ? ? ? ? ? ? ? 8B 85 ? ? ? ? 83 EC 08",
+			SigFollowMode::Relative
+		};
+	}
+
 	namespace CUser
 	{
 		//TODO: Order & Convert old patterns
@@ -175,12 +191,6 @@ namespace Patterns
 			"83 EC 0C 89 F3 8B 7D ? FF 30 E8 ? ? ? ? 83 C4 10 83 FF 01 77 ? 84 C0 75 ? 80 7D ? 00 74 ? 80 7D ? 00 0F 84 ? ? ? ? 8D 65",
 			SigFollowMode::PrologueUpwards,
 			std::vector<uint8_t> { 0x56, 0x57, 0xe5, 0x89, 0x55 }
-		};
-		Pattern_t GetAPICallResult
-		{
-			"IClientUser::GetAPICallResult",
-			"E8 ? ? ? ? 83 C4 20 84 C0 75 ? 8B 86 ? ? ? ? 83 C0 0F",
-			SigFollowMode::Relative
 		};
 		Pattern_t GetAppOwnershipTicketExtendedData
 		{

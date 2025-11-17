@@ -102,7 +102,6 @@ namespace Patterns
 
 	namespace CUser
 	{
-		//TODO: Order & Convert old patterns
 		Pattern_t CheckAppOwnership
 		{
 			"CUser::CheckAppOwnership",
@@ -232,7 +231,6 @@ namespace Patterns
 		};
 	}
 
-	bool init();
 	std::vector<Pattern_t*> patterns;
 }
 

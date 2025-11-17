@@ -179,72 +179,9 @@ bool CConfig::loadSettings()
 	g_pLog->info("DenuvoSpoof: %i\n", denuvoSpoof);
 	g_pLog->info("BlockEncryptedAppTickets: %i\n", blockEncryptedAppTickets);
 
-	//TODO: Create function to parse these kinda nodes, instead of c+p them
-	const auto appIdsNode = node["AppIds"];
-	if (appIdsNode)
-	{
-		for(auto& appIdNode : appIdsNode)
-		{
-			try
-			{
-				uint32_t appId = appIdNode.as<uint32_t>();
-				this->appIds.emplace(appId);
-				g_pLog->info("Added %u to AppIds\n", appId);
-			}
-			catch(...)
-			{
-				g_pLog->notify("Failed to parse %s in AppIds!", appIdNode.as<std::string>().c_str());
-			}
-		}
-	}
-	else
-	{
-		g_pLog->notify("Missing AppIds entry in config!");
-	}
-
-	const auto additionalAppsNode = node["AdditionalApps"];
-	if (additionalAppsNode)
-	{
-		for(auto& appIdNode : additionalAppsNode)
-		{
-			try
-			{
-				uint32_t appId = appIdNode.as<uint32_t>();
-				this->addedAppIds.emplace(appId);
-				g_pLog->info("Added %u to AdditionalApps\n", appId);
-			}
-			catch(...)
-			{
-				g_pLog->notify("Failed to parse %s in AdditionalApps!", appIdNode.as<std::string>().c_str());
-			}
-		}
-	}
-	else
-	{
-		g_pLog->notify("Missing AdditionalApps entry in config!");
-	}
-
-	const auto fakeOfflineNode = node["FakeOffline"];
-	if (fakeOfflineNode )
-	{
-		for(auto& appIdNode : fakeOfflineNode)
-		{
-			try
-			{
-				uint32_t appId = appIdNode.as<uint32_t>();
-				this->fakeOffline.emplace(appId);
-				g_pLog->info("Added %u to FakeOffline\n", appId);
-			}
-			catch(...)
-			{
-				g_pLog->notify("Failed to parse %s in FakeOffline!", appIdNode.as<std::string>().c_str());
-			}
-		}
-	}
-	else
-	{
-		g_pLog->notify("Missing FakeOffline entry in config!");
-	}
+	appIds = getList<uint32_t>(node, "AppIds");
+	addedAppIds = getList<uint32_t>(node, "AdditionalApps");
+	fakeOffline = getList<uint32_t>(node, "FakeOffline");
 
 	const auto dlcDataNode = node["DlcData"];
 	if(dlcDataNode)

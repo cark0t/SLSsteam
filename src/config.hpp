@@ -4,6 +4,7 @@
 
 #include "yaml-cpp/exceptions.h"
 #include "yaml-cpp/node/node.h"
+#include "yaml-cpp/yaml.h"
 
 #include <cstdint>
 #include <cstdio>
@@ -50,7 +51,9 @@ public:
 	bool init();
 
 	bool loadSettings();
-	template<typename T> T getSetting(YAML::Node node, const char* name, T defVal)
+
+	template<typename T>
+	T getSetting(YAML::Node& node, const char* name, T defVal)
 	{
 		if (!node[name])
 		{
@@ -68,6 +71,40 @@ public:
 			return defVal;
 		}
 	};
+
+	template<typename T>
+	std::unordered_set<T> getList(YAML::Node& rootNode, const char* name)
+	{
+		auto list = std::unordered_set<T>();
+
+		const auto node = rootNode[name];
+		if (!node)
+		{
+			g_pLog->notify("Missing %s entry in config!", name);
+			return list;
+		}
+
+		for(auto subNode : node)
+		{
+			try
+			{
+				T val = subNode.as<T>();
+				list.emplace(val);
+
+				//TODO: Find better way to log shit
+				if (std::is_same_v<T, uint32_t>)
+				{
+					g_pLog->debug("Added %u to %s\n", val, name);
+				}
+			}
+			catch(...)
+			{
+				g_pLog->notify("Failed to parse %s in %s!", subNode.as<std::string>().c_str(), name);
+			}
+		}
+
+		return list;
+	}
 
 	bool isAddedAppId(uint32_t appId);
 	bool addAdditionalAppId(uint32_t appId);

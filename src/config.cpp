@@ -201,7 +201,7 @@ bool CConfig::loadSettings()
 				uint32_t v = node.second.as<uint32_t>();
 				fakeAppIds[k] = v;
 
-				g_pLog->debug("Added %u : %u to FakeAppIds\n", k, v);
+				g_pLog->info("Added %u : %u to FakeAppIds\n", k, v);
 			}
 			catch(...)
 			{

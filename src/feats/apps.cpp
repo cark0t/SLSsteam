@@ -48,6 +48,7 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 	(
 		g_config.isAddedAppId(appId)
 		|| (g_config.playNotOwnedGames && !pInfo->purchased)
+		//This is kinda weird, since it respect the exclusion list. But I'll keep it like this for now
 		|| ownerOverride != pInfo->ownerSteamId
 	))
 	{

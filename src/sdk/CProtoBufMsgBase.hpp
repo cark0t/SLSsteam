@@ -1,11 +1,17 @@
 #pragma once
 
+#include "protobufs/steammessages_base.pb.h"
+#include "protobufs/encrypted_app_ticket.pb.h"
+#include "protobufs/steammessages_clientserver.pb.h"
+#include "protobufs/steammessages_clientserver_userstats.pb.h"
+
 #include <cstdint>
 
 enum EMsgType : uint16_t
 {
 	EMSG_REQUEST_USERSTATS_RESPONSE = 0x333,
-	EMSG_APPOWNERSHIPTICKET_RESPONSE = 0x35a
+	EMSG_APPOWNERSHIPTICKET_RESPONSE = 0x35a,
+	EMSG_ENCRYPTEDAPPTICKET_RESPONSE = 0x1597
 };
 
 
@@ -20,6 +26,8 @@ public:
 }; //0x2C
 
 
+//Replaced by actual dumped & protoc generated classes
+//TODO: Replace ticket.cpp implementation with proper class too
 class CMsgAppOwnershipTicketResponse
 {
 public:

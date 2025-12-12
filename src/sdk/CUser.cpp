@@ -1,8 +1,9 @@
 #include "CUser.hpp"
 
+#include "CAppOwnershipInfo.hpp"
+
 #include "../hooks.hpp"
 #include "../patterns.hpp"
-#include "CAppOwnershipInfo.hpp"
 
 
 bool CUser::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)

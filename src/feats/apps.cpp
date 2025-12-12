@@ -1,5 +1,6 @@
 #include "apps.hpp"
 
+#include "../sdk/CAppOwnershipInfo.hpp"
 #include "../sdk/CUser.hpp"
 #include "../sdk/IClientApps.hpp"
 

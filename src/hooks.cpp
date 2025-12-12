@@ -10,7 +10,7 @@
 
 #include "sdk/CAppOwnershipInfo.hpp"
 #include "sdk/CAppTicket.hpp"
-#include "sdk/CCallback.hpp"
+#include "sdk/ECallback.hpp"
 #include "sdk/CProtoBufMsgBase.hpp"
 #include "sdk/CSteamEngine.hpp"
 #include "sdk/CUser.hpp"

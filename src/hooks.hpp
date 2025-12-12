@@ -1,6 +1,4 @@
 #pragma once
-#include "memhlp.hpp"
-#include "patterns.hpp"
 
 #include "libmem/libmem.h"
 
@@ -10,6 +8,8 @@
 
 class CAppOwnershipInfo;
 class CProtoBufMsgBase;
+
+struct Pattern_t;
 
 template<typename T>
 union FunctionUnion_t

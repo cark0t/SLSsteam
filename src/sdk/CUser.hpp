@@ -1,6 +1,7 @@
 #pragma once
 
-#include "CAppOwnershipInfo.hpp"
+class CAppOwnershipInfo;
+
 #include <cstdint>
 
 class CUser

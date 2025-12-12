@@ -1,11 +1,10 @@
 #pragma once
 
-#include "../sdk/CAppOwnershipInfo.hpp"
-
 #include <cstddef>
 #include <cstdint>
 #include <map>
 
+class CAppOwnershipInfo;
 
 namespace Apps
 {

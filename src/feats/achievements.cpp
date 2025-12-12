@@ -1,5 +1,6 @@
 #include "achievements.hpp"
 
+#include "../sdk/CProtoBufMsgBase.hpp"
 #include "../sdk/EResult.hpp"
 
 #include "../log.hpp"

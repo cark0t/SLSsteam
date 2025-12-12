@@ -1,13 +1,14 @@
 #pragma once
 
-#include "../sdk/CAppTicket.hpp"
-#include "../sdk/CCallback.hpp"
-#include "../sdk/CProtoBufMsgBase.hpp"
+#include "../sdk/ECallback.hpp"
 
 #include <cstdint>
 #include <map>
 #include <string>
 
+class CAppTicket;
+class CEncryptedAppTicket;
+class CMsgAppOwnershipTicketResponse;
 
 namespace Ticket
 {

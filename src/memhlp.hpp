@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <vector>
 
+
 namespace MemHlp
 {
 	enum class SigFollowMode

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../sdk/CProtoBufMsgBase.hpp"
+
+class CProtoBufMsgBase;
 
 namespace Achievements
 {

@@ -3,6 +3,8 @@
 #include "../config.hpp"
 #include "../globals.hpp"
 
+#include "../sdk/CAppTicket.hpp"
+#include "../sdk/CProtoBufMsgBase.hpp"
 #include "../sdk/CUser.hpp"
 #include "../sdk/IClientUtils.hpp"
 #include "../sdk/EResult.hpp"

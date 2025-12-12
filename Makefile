@@ -11,7 +11,7 @@ deps := $(objs:%.o=%.d)
 
 CXXFLAGS := -O3 -flto=auto -fPIC -m32 -std=c++20 -Wall -Wextra -Wpedantic -Wno-error=format-security
 
-LDFLAGS := -shared
+LDFLAGS := -shared -Wl,--no-undefined
 LDFLAGS += $(shell pkg-config --libs "openssl")
 
 DATE := $(shell date "+%Y%m%d%H%M%S")

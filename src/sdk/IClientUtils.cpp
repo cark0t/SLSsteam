@@ -1,14 +1,18 @@
 #include "IClientUtils.hpp"
 
 #include "../memhlp.hpp"
+#include "../patterns.hpp"
 #include "../vftableinfo.hpp"
+
+#include "libmem/libmem.h"
 
 #include <cstdint>
 
 uint32_t* IClientUtils::getPipeIndex()
 {
 	//Offset found in IClientUtils::GetAppId
-	return reinterpret_cast<uint32_t*>(this - 0x944);
+	const static auto offset = *reinterpret_cast<lm_address_t*>(Patterns::IClientUtils::Offset_GetPipeIndex.address + 0x2);
+	return reinterpret_cast<uint32_t*>(this + offset);
 }
 
 

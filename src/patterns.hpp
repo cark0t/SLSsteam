@@ -43,6 +43,8 @@ namespace Patterns
 		extern Pattern_t Init;
 		extern Pattern_t GetAPICallResult;
 		extern Pattern_t SetAppIdForCurrentPipe;
+
+		extern Pattern_t Offset_User;
 	}
 
 	namespace CUser
@@ -95,6 +97,7 @@ namespace Patterns
 	namespace IClientUtils
 	{
 		extern Pattern_t PipeLoop;
+		extern Pattern_t Offset_GetPipeIndex;
 	}
 
 

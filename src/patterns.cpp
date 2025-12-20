@@ -107,6 +107,12 @@ namespace Patterns
 			"E8 ? ? ? ? E9 ? ? ? ? ? ? ? ? ? 8B 85 ? ? ? ? 83 EC 08",
 			SigFollowMode::Relative
 		};
+		Pattern_t Offset_User
+		{
+			"CSteamEngine::m_pUser",
+			"8B 80 ? ? ? ? FF 75 ? 8D 34",
+			SigFollowMode::None
+		};
 	}
 
 	namespace CUser
@@ -258,6 +264,12 @@ namespace Patterns
 			"83 EC 08 89 F3 50 57 E8 ? ? ? ? 58 FF B5 ? ? ? ? E8 ? ? ? ? 58 8D 45",
 			SigFollowMode::PrologueUpwards,
 			std::vector<uint8_t> { 0x56, 0x57, 0xe5, 0x89, 0x55 }
+		};
+		Pattern_t Offset_GetPipeIndex
+		{
+			"IClientUtils::m_PipeIndex",
+			"8B 91 ? ? ? ? 83 F8 FF 74 ? 8B 89 ? ? ? ? EB ? ? ? ? 8B 00 83 F8 FF 74 ? 8D 04 ? 8D 04 ? 3B 50",
+			SigFollowMode::None,
 		};
 	}
 

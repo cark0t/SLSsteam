@@ -24,7 +24,6 @@ enum class LogLevel : unsigned int
 class CLog
 {
 	std::ofstream ofstream;
-	std::unordered_set<char*> msgCache;
 
 	constexpr const char* logLvlToStr(LogLevel& lvl)
 	{
@@ -61,24 +60,6 @@ class CLog
 		char* formatted = reinterpret_cast<char*>(malloc(size));
 		snprintf(formatted, size, msg, args...);
 
-		bool freeFormatted = true;
-		if (lvl == LogLevel::Once)
-		{
-			//Can't use match functions from unordered_set because it's to unprecise.
-			//We could replace it with our own if we deem it necessary though
-			for(auto& msg : msgCache)
-			{
-				if (strcmp(msg, formatted) == 0)
-				{
-					free(formatted);
-					return;
-				}
-			}
-
-			msgCache.emplace(formatted);
-			freeFormatted = false;
-		}
-
 		std::stringstream notifySS;
 
 		switch(lvl)
@@ -110,10 +91,7 @@ class CLog
 		}
 
 		ofstream.flush();
-		if (freeFormatted)
-		{
-			free(formatted);
-		}
+		free(formatted);
 	}
 
 public:

@@ -4,6 +4,7 @@
 #include "protobufs/encrypted_app_ticket.pb.h"
 #include "protobufs/steammessages_clientserver.pb.h"
 #include "protobufs/steammessages_clientserver_appinfo.pb.h"
+#include "protobufs/steammessages_clientserver_friends.pb.h"
 #include "protobufs/steammessages_clientserver_userstats.pb.h"
 
 #include <cstdint>

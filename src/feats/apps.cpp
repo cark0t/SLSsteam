@@ -58,14 +58,21 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 		return false;
 	}
 
-	if (!g_config.shouldExcludeAppId(appId) && (g_config.isAddedAppId(appId) || (g_config.playNotOwnedGames.get() && !pInfo->purchased)))
+	if (g_config.shouldExcludeAppId(appId))
 	{
-		unlockApp(appId, pInfo);
+		return false;
+	}
+
+	if (!g_config.isAddedAppId(appId) && (!g_config.playNotOwnedGames.get() || pInfo->purchased))
+	{
+		return false;
 	}
 
 	//Returning false after we modify data shouldn't cause any problems because it should just get discarded
 	if (!g_pClientApps)
+	{
 		return false;
+	}
 
 	auto type = g_pClientApps->getAppType(appId);
 	if (type == APPTYPE_DLC) //Don't touch DLC here, otherwise downloads might break. Hopefully this won't decrease compatibility
@@ -85,6 +92,8 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 				return false;
 		}
 	}
+
+	unlockApp(appId, pInfo);
 
 	return true;
 }

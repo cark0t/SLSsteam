@@ -4,10 +4,13 @@
 #include <cstdint>
 
 
+class CAppOwnershipInfo;
+
 namespace DLC
 {
 	bool shouldUnlockDlc(uint32_t appId);
 
+	bool checkAppOwnership(uint32_t appId, CAppOwnershipInfo* info);
 	bool isDlcEnabled(uint32_t appId);
 	bool isSubscribed(uint32_t appId);
 	bool isAppDlcInstalled(uint32_t appId);

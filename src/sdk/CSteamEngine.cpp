@@ -6,7 +6,7 @@
 
 CUser* CSteamEngine::getUser(uint32_t index)
 {
-	const auto ppUserMap = *reinterpret_cast<uint8_t**>(this + 0xa54);
+	const auto ppUserMap = *reinterpret_cast<uint8_t**>(this + 0xa64);
 	const auto ppUser = ppUserMap + index * 8;
 
 	return *reinterpret_cast<CUser**>(ppUser + 4);

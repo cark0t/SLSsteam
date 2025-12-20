@@ -85,8 +85,8 @@ namespace Hooks
 	typedef bool(*CSteamEngine_GetAPICallResult_t)(void*, uint32_t, uint32_t, void*, uint32_t, uint32_t, bool*);
 	typedef uint32_t(*CSteamEngine_SetAppIdForCurrentPipe_t)(void*, uint32_t, bool);
 
-	typedef bool(*CUser_CheckAppOwnership_t)(void*, uint32_t, CAppOwnershipInfo*);
-	typedef uint32_t(*CUser_GetSubscribedApps_t)(void*, uint32_t*, size_t, bool);
+	typedef uint32_t(*CUser_CheckAppOwnership_t)(void*, uint32_t, CAppOwnershipInfo*);
+	typedef uint32_t(*CUser_GetSubscribedApps_t)(void*, uint32_t*, uint32_t, uint8_t);
 
 	typedef bool(*IClientUser_BIsSubscribedApp_t)(void*, uint32_t);
 	typedef bool(*IClientUser_BLoggedOn_t)(void*);

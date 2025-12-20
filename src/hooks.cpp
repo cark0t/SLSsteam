@@ -248,9 +248,9 @@ static uint32_t hkSteamEngine_SetAppIdForCurrentPipe(void* pSteamEngine, uint32_
 }
 
 __attribute__((hot))
-static bool hkUser_CheckAppOwnership(void* pClientUser, uint32_t appId, CAppOwnershipInfo* pOwnershipInfo)
+static uint32_t hkUser_CheckAppOwnership(void* pClientUser, uint32_t appId, CAppOwnershipInfo* pOwnershipInfo)
 {
-	const bool ret = Hooks::CUser_CheckAppOwnership.tramp.fn(pClientUser, appId, pOwnershipInfo);
+	const uint32_t ret = Hooks::CUser_CheckAppOwnership.tramp.fn(pClientUser, appId, pOwnershipInfo);
 
 	//Do not log pOwnershipInfo because it gets deleted very quickly, so it's pretty much useless in the logs
 	g_pLog->once
@@ -263,7 +263,7 @@ static bool hkUser_CheckAppOwnership(void* pClientUser, uint32_t appId, CAppOwne
 		ret
 	);
 
-	if (Apps::checkAppOwnership(appId, pOwnershipInfo))
+	if (Apps::checkAppOwnership(appId, pOwnershipInfo) || DLC::checkAppOwnership(appId, pOwnershipInfo))
 	{
 		return true;
 	}
@@ -271,7 +271,7 @@ static bool hkUser_CheckAppOwnership(void* pClientUser, uint32_t appId, CAppOwne
 	return ret;
 }
 
-static uint32_t hkUser_GetSubscribedApps(void* pClientUser, uint32_t* pAppList, size_t size, bool a3)
+static uint32_t hkUser_GetSubscribedApps(void* pClientUser, uint32_t* pAppList, uint32_t size, uint8_t a3)
 {
 	uint32_t count = Hooks::CUser_GetSubscribedApps.tramp.fn(pClientUser, pAppList, size, a3);
 

@@ -69,6 +69,7 @@ zips: rebuild
 	7z a -mx9 -m9=lzma2 \
 		"zips/SLSsteam $(DATE).7z" \
 		"bin/SLSsteam.so" \
+		"bin/library-inject.so" \
 		"setup.sh" \
 		"docs/LICENSE" \
 		"res/config.yaml" \
@@ -79,6 +80,7 @@ zips: rebuild
 	7z a -mx9 -m9=lzma \
 		"zips/SLSsteam $(DATE).zip" \
 		"bin/SLSsteam.so" \
+		"bin/library-inject.so" \
 		"setup.sh" \
 		"docs/LICENSE" \
 		"res/config.yaml" \
@@ -90,7 +92,7 @@ zips-config:
 	#Compatibility for Github issues
 	7z a -mx9 -m9=lzma2 "zips/SLSsteam - SLSConfig $(DATE).7z" "$(HOME)/.config/SLSsteam/config.yaml"
 
-build: bin/SLSsteam.so
+build: audit-libs
 rebuild: clean build
 all: clean build zips
 

@@ -12,6 +12,7 @@ pkgs.pkgsi686Linux.stdenv.mkDerivation {
   nativeBuildInputs = with pkgs; [
     pkg-config
     makeWrapper
+    curlFull
   ];
 
   buildInputs = with pkgs.pkgsi686Linux; [
